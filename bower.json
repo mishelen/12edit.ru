@@ -1,0 +1,6 @@
+{
+  "name": "12edit.ru",
+  "dependencies": {
+    "foundation": "zurb/bower-foundation"
+  }
+}

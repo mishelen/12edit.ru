@@ -1,0 +1,8 @@
+node_modules
+.tmp
+app/bower_components
+.grunt
+app/**/*.html
+app/**/*.css
+.sass-cache
+dist/

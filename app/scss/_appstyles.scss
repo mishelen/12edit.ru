@@ -1,0 +1,229 @@
+%title {
+	background-color: $primary-color;
+	color: white;
+	padding: 3px;
+}
+
+
+@mixin heading {
+	font-family: Georgia, serif;
+	font-style: italic;
+}
+
+
+
+.person	{
+	margin: 0;
+	max-width: 200px;
+	@media #{$large-up} {
+		position: absolute;
+		right:  - rem-calc(200) - $column-gutter;
+
+	}
+	img {
+		width: 200px;
+		height: 200px;
+
+	}
+
+	figcaption {
+		@extend %title;
+	}
+}
+
+@for $i from 1 through 6 {
+	.h#{$i} {
+		@extend h#{$i};
+		@include heading;
+	}
+}
+
+
+img.th {
+	background-color: $iron;
+}
+
+$cover-sm: $paragraph-font-size*6;
+$cover-lg: $paragraph-font-size*9;
+.player {
+	position: relative;
+	margin: $paragraph-font-size*3 0 $paragraph-font-size*4;
+	&.left,
+	&.right {
+		width: 200px;
+		min-width: auto;
+		@media #{$large-up} {
+			position: absolute;
+		}
+	}
+	&.left {
+		padding-right: 3em;
+		@media #{$large-up} {
+			left: -250px;
+
+		}
+	}
+
+	&.right {
+		padding-left: 3em;
+		@media #{$large-up} {
+			position: absolute;
+			right: -250px;
+		}
+	}
+
+	&-slider {
+		padding-left: $cover-sm + $paragraph-font-size;
+		max-width: none;
+
+		@media #{$large-up} {
+			margin-left: -10%;
+			padding-left: $cover-lg + $paragraph-font-size;
+		}
+		& .player-progress {
+			position: relative;
+			left: auto;
+			right: auto;
+			float: right;
+			margin-left: 50px;
+		}
+
+		&.playing  {
+			.player-controls {
+				width: 640px;
+				transition: 0.3s;
+			}
+		}
+		& .player-controls {
+			display: inline-block;
+			width: 100px;
+			margin: $paragraph-font-size 0;
+		}
+		.tag {
+			display: block;
+			color: $base;
+		}
+		.cover {
+			width: $cover-sm;
+			height: $cover-sm;
+
+			@media #{$large-up} {
+				width: $cover-lg;
+				height: $cover-lg;
+			}
+
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+	}
+
+	&-thumb,
+	&-amp {
+		.player-controls {
+			display: inline-block;
+			width: auto;
+			background-color: transparent;
+			.btn {
+				border-radius: 50%;
+				padding: 0.2em;
+			}
+		}
+
+		&.loading {
+			.btn {
+				@include loading-animation();
+			}
+		}
+		.title {
+			@extend %title;
+		}
+	}
+
+	&-amp {
+		.player-controls {
+			.btn {
+				margin-right: 1em;
+				margin-left: 4em;
+			}
+		}
+	}
+
+	&-video {
+		width: 100%;
+		video {
+			width: 100%;
+			cursor: pointer;
+		}
+	}
+}
+
+
+.player-amp {
+	display: table;
+	border-collapse: separate;
+	position: relative;
+	object {
+		display: table-cell !important;
+		width: 100%;
+		margin-bottom: 0;
+	}
+
+	.player-controls {
+		display: table-cell !important;
+		font-size: 0;
+		position: relative;
+		vertical-align: middle;
+		white-space: nowrap;
+		width: 1%;
+	}
+
+}
+
+
+.player.paused .play {
+  background: #665d76;
+}
+
+.player-controls {
+  text-align: left !important;
+  .player-volume-container {
+	float: right;
+  }
+}
+
+
+
+
+.player-controls .player-btn-container {
+  display: inline-block;
+}
+
+.player-controls .btn {
+  margin: 0 0.2em;
+}
+
+
+.player-volume-container {
+  display: inline-block;
+}
+
+
+.player-current-time,
+.player-duration {
+}
+
+
+
+.player img,
+.player object {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+
+.player video {
+	background: url(../images/12logo.gif) no-repeat center;
+	// border: 1px dotted $smoke ;
+}

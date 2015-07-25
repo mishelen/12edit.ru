@@ -1,0 +1,529 @@
+// Переменные
+// -------------------------------
+// Цвета
+$lighter-viola: #9f88c6;
+$normal-viola: #512698;
+
+$blue: $lighter-viola !default;
+$gray-dark: $normal-viola !default;
+$gray: #565d64 !default;
+$gray-light: #cbd0d3 !default;
+$off-white: #d6dadd !default;
+
+// Кегли
+$font-size-small: 14px !default;
+$font-size-base: 16px !default;
+$font-size-large: ceil(($font-size-base * 1.5)) !default;
+
+// Контролы
+$control-spacing: 10px !default;
+$controls-bg: $gray-dark !default;
+$control-bg-hover: $blue !default;
+$control-color: $gray-light !default;
+$control-color-inactive: $gray !default;
+$control-color-hover: #fff !default;
+
+// Прогресс
+$progress-bg: rgba(red($gray), green($gray), blue($gray), .2) !default;
+$progress-playing-bg: $blue !default;
+$progress-buffered-bg: rgba(red($gray), green($gray), blue($gray), .25) !default;
+$progress-loading-size: 40px !default;
+$progress-loading-bg: rgba(0, 0, 0, .15) !default;
+
+// Громкость
+$volume-track-height: 6px !default;
+$volume-track-bg: $gray !default;
+$volume-thumb-height: ($volume-track-height * 2) !default;
+$volume-thumb-width: ($volume-track-height * 2) !default;
+$volume-thumb-bg: $control-color !default;
+$volume-thumb-bg-focus: $control-bg-hover !default;
+
+// Брейкпооинты
+$bp-control-split: 560px !default;
+// Появление таймера, и раскидывание лево/право (сейчас не используется)
+
+// Хелперы и миксины
+// -------------------------------
+// Класс для скрин-ридеров
+.sr-only {
+	position: absolute !important;
+	clip: rect(1px, 1px, 1px, 1px);
+	padding: 0 !important;
+	border: 0 !important;
+	height: 1px !important;
+	width: 1px !important;
+	overflow: hidden;
+}
+
+// Клеафикс от Гэлахера
+@mixin clearfix() {
+	zoom: 1;
+	&:before,
+	&:after {
+		content: "";
+		display: table;
+	}
+	&:after {
+		clear: both;
+	}
+}
+
+// Стилизация для фокуса, например по табу
+@mixin tab-focus() {
+	outline: thin dotted #000;
+	outline-offset: 0;
+}
+
+// Анимация
+// ---------------------------------------
+
+
+@mixin loading-animation() {
+	animation: progress 1s linear infinite;
+	background-size: $progress-loading-size $progress-loading-size;
+	background-repeat: repeat-x;
+	background-color: $progress-buffered-bg;
+	background-image: linear-gradient(
+					-45deg,
+					$progress-loading-bg 25%,
+					transparent 25%,
+					transparent 50%,
+					$progress-loading-bg 50%,
+					$progress-loading-bg 75%,
+					transparent 75%,
+					transparent);
+	color: transparent;
+}
+
+
+@keyframes progress {
+	to {
+		background-position: $progress-loading-size 0;
+	}
+}
+
+// <input type="range"> Стилизация
+// ---------------------------------------
+@mixin volume-thumb() {
+	height: $volume-thumb-height;
+	width: $volume-thumb-width;
+	background: $volume-thumb-bg;
+	border: 0;
+	border-radius: ($volume-thumb-height / 2);
+	transition: background .3s ease;
+	cursor: ew-resize;
+}
+
+@mixin volume-track() {
+	height: $volume-track-height;
+	background: $volume-track-bg;
+	border: 0;
+	border-radius: ($volume-track-height / 2);
+}
+
+@mixin seek-thumb() {
+	background: transparent;
+	border: 0;
+	width: ($control-spacing * 2);
+	height: $control-spacing;
+}
+
+@mixin seek-track() {
+	background: none;
+	border: 0;
+}
+
+// Сглаживание
+// ---------------------------------------
+@mixin font-smoothing($mode: on) {
+	@if $mode == 'on' {
+		-moz-osx-font-smoothing: grayscale;
+		-webkit-font-smoothing: antialiased;
+	} @else if $mode == 'off' {
+		-moz-osx-font-smoothing: auto;
+		-webkit-font-smoothing: subpixel-antialiased;
+	}
+}
+
+// Стили
+// -------------------------------
+// Базовые
+.player {
+	position: relative;
+	max-width: 100%;
+	min-width: 290px;
+
+	// Айриш говорит, что border-box везде
+	&,
+	*,
+	*::after,
+	*::before {
+		box-sizing: border-box;
+	}
+
+	//// Для видео ... не используется
+	//&-video-wrapper {
+	//	position: relative;
+	//}
+
+	video {
+		width: 100%;
+		height: auto;
+		vertical-align: middle;
+	}
+
+	// Блок контролов, т.е. сам плеер.
+	&-controls {
+		@include clearfix();
+		@include font-smoothing();
+		position: relative;
+		padding: $control-spacing;
+		background: $controls-bg;
+		line-height: 1;
+		text-align: center;
+
+		// Раскладка управление, сейчас не используется
+		&-right {
+			display: block;
+			margin: $control-spacing auto 0;
+		}
+		@media (min-width: $bp-control-split) {
+			&-left {
+				float: left;
+			}
+			&-right {
+				float: right;
+				margin-top: 0;
+			}
+		}
+
+		input + label,
+		button {
+			display: inline-block;
+			vertical-align: middle;
+			margin: 0 2px;
+			padding: ($control-spacing / 2) $control-spacing;
+
+			transition: background .3s ease;
+			border-radius: 3px;
+			cursor: pointer;
+		}
+
+		input + label,
+		.inverted:checked + label {
+			color: $control-color-inactive;
+		}
+
+		button,
+		.inverted + label,
+		input:checked + label {
+			color: $control-color;
+		}
+		button {
+			border: 0;
+			background: transparent;
+			overflow: hidden;
+		}
+
+		// Специфичность для переписывания инвертированного оформления
+		button:focus,
+		button:hover,
+		[type="checkbox"]:focus + label,
+		[type="checkbox"] + label:hover {
+			background: $control-bg-hover;
+			color: $control-color-hover;
+		}
+		button:focus,
+		input:focus + label {
+			outline: 0;
+		}
+
+		//.icon-exit-fullscreen,
+		.icon-muted,
+		.icon-captions-on {
+			display: none;
+		}
+		.player-time {
+			display: inline-block;
+			vertical-align: middle;
+			margin-left: $control-spacing;
+			color: $control-color;
+			font-weight: 600;
+			font-size: $font-size-small;
+			@include font-smoothing();
+		}
+
+		// На малых экранах времени нет
+		.player-time + .player-time {
+			display: none;
+
+			@media (min-width: $bp-control-split) {
+				display: inline-block;
+			}
+
+			// Слеш для времени
+			&::before {
+				content: "\2044";
+				margin-right: $control-spacing;
+				color: darken($control-color, 30%);
+			}
+		}
+	}
+
+	// Проигрывание, прогресс
+	&-progress {
+		position: absolute;
+		bottom: 100%;
+		left: 0;
+		right: 0;
+		width: 100%;
+		height: $control-spacing;
+		background: $progress-bg;
+
+		&-buffer[value],
+		&-played[value],
+		&-seek[type=range] {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: $control-spacing;
+			margin: 0;
+			padding: 0;
+			vertical-align: top;
+
+			-webkit-appearance: none;
+			-moz-appearance: none;
+			border: none;
+			background: transparent;
+		}
+		&-buffer[value],
+		&-played[value] {
+			&::-webkit-progress-bar {
+				background: transparent;
+			}
+
+			// Наследование от currentColor;
+			&::-webkit-progress-value {
+				background: currentColor;
+			}
+			&::-moz-progress-bar {
+				background: currentColor;
+			}
+		}
+		&-played[value] {
+			z-index: 2;
+			color: $progress-playing-bg;
+		}
+		&-buffer[value] {
+			color: $progress-buffered-bg;
+		}
+
+		// Управление/оформление инпута прогресса: <input[type='range']>
+		&-seek[type=range] {
+			z-index: 4;
+			cursor: pointer;
+			outline: 0;
+
+			// Webkit
+			&::-webkit-slider-runnable-track {
+				@include seek-track();
+			}
+			&::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				@include seek-thumb();
+			}
+
+			// Mozilla
+			&::-moz-range-track {
+				@include seek-track();
+			}
+			&::-moz-range-thumb {
+				-moz-appearance: none;
+				@include seek-thumb();
+			}
+
+			// Microsoft
+			&::-ms-track {
+				color: transparent;
+				@include seek-track();
+			}
+			&::-ms-fill-lower,
+			&::-ms-fill-upper {
+				@include seek-track();
+			}
+			&::-ms-thumb {
+				@include seek-thumb();
+			}
+
+			&:focus {
+				outline: 0;
+			}
+			&::-moz-focus-outer {
+				border: 0;
+			}
+		}
+	}
+
+	// состояние загрузки
+	&.loading .player-progress-buffer {
+		@include loading-animation();
+	}
+
+	// Контроль громкости
+	&-volume[type=range] {
+		display: inline-block;
+		vertical-align: middle;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		width: 100px;
+		margin: 0 $control-spacing 0 0;
+		padding: 0;
+		cursor: pointer;
+		background: transparent;
+		border: none;
+
+		// Webkit
+		&::-webkit-slider-runnable-track {
+			@include volume-track();
+		}
+		&::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			margin-top: -(($volume-thumb-height - $volume-track-height) / 2);
+			@include volume-thumb();
+		}
+
+		// Mozilla
+		&::-moz-range-track {
+			@include volume-track();
+		}
+		&::-moz-range-thumb {
+			@include volume-thumb();
+		}
+
+		// Microsoft
+		&::-ms-track {
+			height: $volume-track-height;
+			background: transparent;
+			border-color: transparent;
+			border-width: (($volume-thumb-height - $volume-track-height) / 2) 0;
+			color: transparent;
+		}
+		&::-ms-fill-lower,
+		&::-ms-fill-upper {
+			@include volume-track();
+		}
+		&::-ms-thumb {
+			@include volume-thumb();
+		}
+
+		&:focus {
+			outline: 0;
+
+			&::-webkit-slider-thumb {
+				background: $volume-thumb-bg-focus;
+			}
+			&::-moz-range-thumb {
+				background: $volume-thumb-bg-focus;
+			}
+			&::-ms-thumb {
+				background: $volume-thumb-bg-focus;
+			}
+		}
+	}
+
+	// Прячем контролы уровня звука на айосе
+	// Так как там нельзя поменять через JS громкость
+	// надо еще будет пересмотреть селекторы
+	&.ios &-volume,
+	&.ios [data-player='mute'],
+	&.ios [data-player='mute'] + label,
+	&-audio.ios &-controls-right {
+		display: none;
+	}
+	&-audio.ios &-controls-left {
+		float: none;
+	}
+
+	// Стили для аудио
+	// Расположение прогресса внутри контейнера
+	&-audio .player-controls {
+		padding-top: ($control-spacing * 2);
+	}
+	&-audio .player-progress {
+		bottom: auto;
+		top: 0;
+		background: $off-white;
+	}
+}
+
+//// Полноэкранный режим
+//&-fullscreen,
+//&.fullscreen-active {
+//    position: fixed;
+//    top: 0;
+//    left: 0;
+//    right: 0;
+//    bottom: 0;
+//    height: 100%;
+//    width: 100%;
+//    z-index: 10000000;
+//    background: #000;
+//
+//    video {
+//        height: 100%;
+//    }
+//    .player-video-wrapper {
+//        height: 100%;
+//        width: 100%;
+//
+//        .player-captions {
+//            top: auto;
+//            bottom: 90px;
+//
+//            @media (min-width: $bp-control-split) {
+//                bottom: 60px;
+//            }
+//        }
+//    }
+//    .player-controls {
+//        position: absolute;
+//        bottom: 0;
+//        left: 0;
+//        right: 0;
+//    }
+//
+//    // Спрятать контролы в фулскрине при проигрывании
+//    &.fullscreen-hide-controls.playing .player-controls {
+//        transform: translateY(100%) translateY($control-spacing / 2);
+//        transition: transform .3s .2s ease;
+//
+//        &.hover {
+//            transform: translateY(0);
+//        }
+//    }
+//}
+
+//    // Смена иконок
+//    &.fullscreen-active .icon-exit-fullscreen,
+//    &.muted .player-controls .icon-muted,
+//    &.captions-active .player-controls .icon-captions-on {
+//        display: block;
+//
+//        & + svg {
+//            display: none;
+//        }
+//    }
+//
+//    // Некоторые опции скрыты по дефолту
+
+//    [data-player='fullscreen'],
+//    [data-player='fullscreen'] + label {
+//        display: none;
+//    }
+
+//    &.fullscreen-enabled [data-player='fullscreen'],
+//    &.fullscreen-enabled [data-player='fullscreen'] + label {
+//        display: inline-block;
+//    }
+//}
