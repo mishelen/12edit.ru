@@ -1,0 +1,70 @@
+@font-face {
+  font-family: 'twelwe-player';
+  src:url('../fonts/twelwe-player.eot?viuaer');
+  src:url('../fonts/twelwe-player.eot?#iefixviuaer') format('embedded-opentype'),
+    url('../fonts/twelwe-player.ttf?viuaer') format('truetype'),
+    url('../fonts/twelwe-player.woff?viuaer') format('woff'),
+    url('../fonts/twelwe-player.svg?viuaer#twelwe-player') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.icon,
+.player .btn,
+.player button {
+  font-family: 'twelwe-player';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.player .btn {
+  font-size: 36px;
+}
+
+.icon-player-forward:before,
+.player .forward:before {
+  content: "\e600";
+}
+.icon-player-pause:before,
+.player.paused .play:before  {
+  content: "\e601";
+}
+.icon-player-play:before,
+.player .play:before {
+  content: "\e602";
+}
+.icon-player-restart:before,
+.player .restart:before {
+  content: "\e603";
+}
+.icon-player-rewind:before,
+.player .rewind:before {
+  content: "\e604";
+}
+.icon-player-volumax:before,
+label[data-volume="volumax"]:before {
+  content: "\e605";
+}
+.icon-player-volumid:before,
+label[data-volume="volumid"]:before {
+  content: "\e606";
+}
+.icon-player-volumin:before,
+label[data-volume="volumin"]:before {
+  content: "\e607";
+}
+.icon-player-volumute:before,
+.player.muted label[data-volume]:before,
+label[data-volume="volumut"]:before {
+  content: "\e608";
+}
+
+
