@@ -1,33 +1,37 @@
-%title {
-	background-color: $primary-color;
-	color: white;
-	padding: 3px;
+%caption {
+	color: $base;
+	@extend small;
 }
-
 
 @mixin heading {
 	font-family: Georgia, serif;
 	font-style: italic;
 }
 
-
-
+figure {
+	figcaption {
+		@extend %caption;
+		margin: 1em 0;
+	}
+}
+.container {
+	margin: 0 5%;
+}
 .person	{
 	margin: 0;
 	max-width: 200px;
 	@media #{$large-up} {
 		position: absolute;
 		right:  - rem-calc(200) - $column-gutter;
+	}
 
+	&.left,
+	&.right {
+		margin-left: 3em;
+		width: 140px;
 	}
 	img {
-		width: 200px;
-		height: 200px;
 
-	}
-
-	figcaption {
-		@extend %title;
 	}
 }
 
@@ -72,7 +76,8 @@ $cover-lg: $paragraph-font-size*9;
 		}
 	}
 
-	&-slider {
+	&-slider,
+	&[data-player-config="slider"]{
 		padding-left: $cover-sm + $paragraph-font-size;
 		max-width: none;
 
@@ -105,7 +110,7 @@ $cover-lg: $paragraph-font-size*9;
 		}
 		.cover {
 			width: $cover-sm;
-			height: $cover-sm;
+			@extend %caption;
 
 			@media #{$large-up} {
 				width: $cover-lg;
@@ -119,7 +124,9 @@ $cover-lg: $paragraph-font-size*9;
 	}
 
 	&-thumb,
-	&-amp {
+	&-amp,
+	&[data-player-config="thumb"],
+	&[data-player-config="amp"] {
 		.player-controls {
 			display: inline-block;
 			width: auto;
@@ -136,11 +143,19 @@ $cover-lg: $paragraph-font-size*9;
 			}
 		}
 		.title {
-			@extend %title;
+			@extend %caption;
+			margin: 1em 0;
 		}
 	}
 
-	&-amp {
+	&-amp,
+	&[data-player-config="amp"] {
+		@media #{$xlarge-up} {
+			margin-right: -48%;
+			max-width: none;
+			width: auto;
+
+		}
 		.player-controls {
 			.btn {
 				margin-right: 1em;
@@ -159,7 +174,8 @@ $cover-lg: $paragraph-font-size*9;
 }
 
 
-.player-amp {
+.player-amp,
+[data-player-config="amp"] {
 	display: table;
 	border-collapse: separate;
 	position: relative;
@@ -175,15 +191,11 @@ $cover-lg: $paragraph-font-size*9;
 		position: relative;
 		vertical-align: middle;
 		white-space: nowrap;
-		width: 1%;
+		width: 1% !important;
 	}
 
 }
 
-
-.player.paused .play {
-  background: #665d76;
-}
 
 .player-controls {
   text-align: left !important;

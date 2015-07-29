@@ -395,12 +395,6 @@ player = (function (api) {
 			return player.container.querySelector('.' + selector);
 		}
 
-		function launchContainers() {
-			player.media.removeAttribute('controls');
-			player.media.setAttribute('preload', 'metadata');
-			_toggleClass(player.container, 'player-' + player.type, true);
-		}
-
 		function _play() {
 			// Здесь синхронизациия проигрывания всех плееров
 			// Можно доделать асинхронный режим, а то пока грубо, но сам режим
@@ -585,7 +579,6 @@ player = (function (api) {
 		}
 
 		function _setVolume(volume) {
-			if (!player.volume) return;
 			if (typeof volume === 'undefined') {
 				if (defaults.storage.enabled && _storage().supported) {
 					volume = window.localStorage[defaults.storage.key]
@@ -596,10 +589,11 @@ player = (function (api) {
 
 			}
 			if (volume > 10) volume = 10;
-
-			player.volume.value = volume;
 			player.media.volume = parseFloat(volume / 10);
 
+
+			if (!player.volume) return; // Есть плеера без контролов...
+			player.volume.value = volume;
 			if (defaults.storage.enabled && _storage().supported) {
 				window.localStorage.setItem(defaults.storage.key, volume);
 			}
@@ -774,7 +768,7 @@ player = (function (api) {
 			if (player.buttons.restart) _on(player.buttons.restart, 'click', _seek);
 			if (player.buttons.forward) _on(player.buttons.forward, 'click', _forward);
 			if (player.duration) {
-				_on(player.media, 'loadedmetadata', _displayDuration);
+				_on(player.media, 'loadedmetadata durationchange', _displayDuration);
 				// К моменту навешивания обработчика, событие уже могло произойти,
 				// что и происходит при большом количестве плееров, поэтому
 				// нет ничего проще чем:
@@ -793,8 +787,7 @@ player = (function (api) {
 					_setVolume(this.value);
 				});
 			}
-			_on(player.media, 'progress', _updateProgress);
-			_on(player.media, 'playing', _updateProgress);
+			_on(player.media, 'progress playing', _updateProgress);
 			_on(player.media, 'waiting canplay seeked', _checkLoading);
 			_on(player.media, 'play pause', _checkPlaying);
 			_on(player.media, 'timeupdate', _timeUpdate);
@@ -818,12 +811,16 @@ player = (function (api) {
 		function init() {
 			player.media = player.container.querySelectorAll('audio, video')[0];
 			if (!player.media) return false;
-			player.type = player.media.tagName.toLowerCase();
 
-			launchContainers();
+			player.type = player.media.tagName.toLowerCase();
+			player.media.removeAttribute('controls');
+			player.media.setAttribute('preload', 'metadata');
+			_toggleClass(player.container, 'player-' + player.type, true);
+
 			injectControls();
 			referenceControls();
 			_setVolume();
+			_displayDuration();
 			listeners();
 			return true;
 		}

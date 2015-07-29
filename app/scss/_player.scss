@@ -2,12 +2,12 @@
 // -------------------------------
 // Цвета
 $lighter-viola: #9f88c6;
-$normal-viola: #512698;
+$normal-viola: #593596;
 
 $blue: $lighter-viola !default;
 $gray-dark: $normal-viola !default;
-$gray: #565d64 !default;
-$gray-light: #cbd0d3 !default;
+$gray: $lighter-viola !default;
+$gray-light: #767680 !default;
 $off-white: #d6dadd !default;
 
 // Кегли
@@ -17,7 +17,7 @@ $font-size-large: ceil(($font-size-base * 1.5)) !default;
 
 // Контролы
 $control-spacing: 10px !default;
-$controls-bg: $gray-dark !default;
+$controls-bg: transparent !default;
 $control-bg-hover: $blue !default;
 $control-color: $gray-light !default;
 $control-color-inactive: $gray !default;
@@ -27,7 +27,7 @@ $control-color-hover: #fff !default;
 $progress-bg: rgba(red($gray), green($gray), blue($gray), .2) !default;
 $progress-playing-bg: $blue !default;
 $progress-buffered-bg: rgba(red($gray), green($gray), blue($gray), .25) !default;
-$progress-loading-size: 40px !default;
+$progress-loading-size: 50px !default;
 $progress-loading-bg: rgba(0, 0, 0, .15) !default;
 
 // Громкость
