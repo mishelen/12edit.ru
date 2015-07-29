@@ -130,7 +130,7 @@ module.exports = function(grunt) {
 					base: '<%= app %>/',
 					open: true,
 					livereload: true,
-					hostname: '127.0.0.1'
+					hostname: '0.0.0.0'
 				}
 			},
 			dist: {
@@ -159,9 +159,11 @@ module.exports = function(grunt) {
 		},
 		'gh-pages': {
 			options: {
-				base: 'dist'
+				base: 'dist',
+				only: ['**/*', '!*.mp3', '!*.mp4'],
+				message: 'Auto-generated commit'
 			},
-			src: ['**']
+			src: ['**', '!*.ai']
 		}
 
 	});
@@ -176,5 +178,5 @@ module.exports = function(grunt) {
 	
 	grunt.registerTask('publish', ['compile-jade', 'compile-sass', 'clean:dist', 'validate-js', 'useminPrepare', 'copy:dist', 'newer:imagemin', 'concat', 'cssmin', 'uglify', 'usemin']);
 
-	grunt.registerTask('gh-pages', ['gh-pages']);
+	grunt.registerTask('ghp', ['gh-pages']);
 };
