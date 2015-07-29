@@ -37,73 +37,75 @@ var evnt = {
 
 var player;
 player = (function (api) {
-	var defaults = {
-		player_container     : '.player',
-		player_bar           : 'player-controls',
-		buttonClass          : 'btn',
-		screenReaderClass    : 'show-for-sr',
-		stateClassFor        : {
-			paused : 'paused',
-			muted  : 'muted',
-			playing: 'playing',
-			ended  : 'ended',
-			loading: 'loading'
-		},
-		buttonComponents       : {
-			restart: 'restart',
-			play   : 'play',
-			rewind : 'rewind',
-			forward: 'forward'
-		},
-		durationComponents   : {
-			timeContainer: 'player-time',
-			timeCurrent  : 'player-current-time',
-			timeDuration : 'player-duration'
-		},
-		volumeComponents     : {
-			inputVolume: 'player-volume',
-			inputMute  : 'mute',
-			labelMute  : 'for-mute'
-		},
-		seekerComponents     : {
-			container: 'player-progress',
-			buffer   : 'player-progress-buffer',
-			played   : 'player-progress-played',
-			seek     : 'player-progress-seek'
-		},
-		seekTime             : 10,
-		volumeLevel          : 3,
-		syncedPlayers        : true,
-		storage              : {
-			enabled: true,
-			key    : 'volumeLevel'
-		},
-		colors               : {
-			main     : '#512698',
-			second   : '#704caa',
-			unvisible: '#665d76'
-		},
-		alt                  : {
-			play        : 'Проиграть/Поставить на паузу',
-			restart     : 'Твоя песня хороша — начинай сначала',
-			rewind      : 'Перемотать назад',
-			forward     : 'Перемотать вперед',
-			timeDuration: 'Длительность',
-			timeCurrent : 'Текущее время',
-			buffered    : '% загружено',
-			played      : '% проиграно',
-			seek        : 'Перемотать на: ',
-			setVolume   : 'Громкость',
-			muted       : 'Выключить/включить звук'
-		},
-		playerCustomConfigs: {
-			thumb    : ['play'],
-			amp      : ['play', 'amp'],
-			slider   : ['play', 'seeker', 'mute', 'volume'],
-			video    : ['seeker', 'restart', 'play', 'rewind', 'forward', 'timeCurrent', 'timeDuration', 'mute', 'volume'],
-			'default': ['seeker', 'restart', 'play', 'rewind', 'forward', 'timeCurrent', 'timeDuration', 'mute', 'volume']
-		}
-	};
+	var config,
+	    defaults = {
+		    player_container   : '.player',
+		    playerBar          : 'player-controls',
+		    buttonClass        : 'btn',
+		    screenReaderClass  : 'show-for-sr',
+		    stateClassFor      : {
+			    paused : 'paused',
+			    muted  : 'muted',
+			    playing: 'playing',
+			    ended  : 'ended',
+			    loading: 'loading'
+		    },
+		    buttonComponents   : {
+			    restart: 'restart',
+			    play   : 'play',
+			    rewind : 'rewind',
+			    forward: 'forward'
+		    },
+		    durationComponents : {
+			    timeContainer: 'player-time',
+			    timeCurrent  : 'player-current-time',
+			    timeDuration : 'player-duration'
+		    },
+		    volumeComponents   : {
+			    inputVolume: 'player-volume',
+			    inputMute  : 'mute',
+			    labelMute  : 'for-mute'
+		    },
+		    seekerComponents   : {
+			    container: 'player-progress',
+			    buffer   : 'player-progress-buffer',
+			    played   : 'player-progress-played',
+			    seek     : 'player-progress-seek'
+		    },
+		    seekTime           : 10,
+		    volumeLevel        : 3,
+		    syncedPlayers      : true,
+		    storage            : {
+			    enabled: true,
+			    key    : 'volumeLevel'
+		    },
+		    colors             : {
+			    main     : '#512698',
+			    second   : '#704caa',
+			    unvisible: '#665d76'
+		    },
+		    alt                : {
+			    play        : 'Проиграть/Поставить на паузу',
+			    restart     : 'Твоя песня хороша — начинай сначала',
+			    rewind      : 'Перемотать назад',
+			    forward     : 'Перемотать вперед',
+			    timeDuration: 'Длительность',
+			    timeCurrent : 'Текущее время',
+			    buffered    : '% загружено',
+			    played      : '% проиграно',
+			    seek        : 'Перемотать на: ',
+			    setVolume   : 'Громкость',
+			    muted       : 'Выключить/включить звук'
+		    },
+		    playerCustomConfigs: {
+			    thumb    : ['play'],
+			    amp      : ['play', 'amp'],
+//			    slider   : ['seeker', 'play', 'timeCurrent', 'timeDuration', 'mute', 'volume'],
+			    slider   : ['play', 'mute', 'seeker', 'volume'],
+			    video    : ['seeker', 'restart', 'play', 'rewind', 'forward', 'timeCurrent', 'timeDuration', 'mute', 'volume'],
+			    'default': ['seeker', 'restart', 'play', 'rewind', 'forward', 'timeCurrent', 'timeDuration', 'mute', 'volume']
+		    }
+	    };
 
 	// тут хранится инстанс последнего плеера, что
 	// вызвал события played / paused
@@ -117,6 +119,21 @@ player = (function (api) {
 	function _random_ceil(digits) {
 		var numer = Math.ceil(Math.random() * Math.pow(10, digits));
 		return numer;
+	}
+
+	// Глубокий (рекурсивный) мержинг двух объектов
+	function _extend(destination, source) {
+		for (var property in source) {
+			if (source[property] && source[property].constructor &&
+				source[property].constructor === Object) {
+				destination[property] = destination[property] || {};
+				_extend(destination[property], source[property]);
+			}
+			else {
+				destination[property] = source[property];
+			}
+		}
+		return destination;
 	}
 
 	function _remove(element) {
@@ -648,8 +665,8 @@ player = (function (api) {
 				progressAmp.id  = 'progress';
 				progressAmp.setAttribute('clip-path',
 					'url(#' + clip.getAttribute('id') + ')');
-				progressAmp.setAttribute('fill', defaults.colors.main);
-				allAmp.setAttribute('fill', defaults.colors.unvisible);
+				progressAmp.setAttribute('fill', config.colors.main);
+				allAmp.setAttribute('fill', config.colors.unvisible);
 				//                svg.getAttribute('viewBox').split(' ');
 				svg.insertBefore(defs, allAmp);
 				svg.insertBefore(progressAmp, allAmp.nextSibling);
@@ -697,25 +714,25 @@ player = (function (api) {
 
 		function referenceControls() {
 			player.buttons           = {};
-			player.buttons.play      = _getEl(defaults.buttonComponents.play);
-			player.buttons.restart   = _getEl(defaults.buttonComponents.restart);
-			player.buttons.rewind    = _getEl(defaults.buttonComponents.rewind);
-			player.buttons.forward   = _getEl(defaults.buttonComponents.forward);
-			player.buttons.mute      = _getEl(defaults.volumeComponents.inputMute);
-			player.buttons.muteLabel = _getEl(defaults.volumeComponents.labelMute);
-			player.buttons.seek      = _getEl(defaults.seekerComponents.seek);
-			player.duration          = _getEl(defaults.durationComponents.timeDuration);
-			player.curTime           = _getEl(defaults.durationComponents.timeCurrent);
-			player.volume            = _getEl(defaults.volumeComponents.inputVolume);
+			player.buttons.play      = _getEl(config.buttonComponents.play);
+			player.buttons.restart   = _getEl(config.buttonComponents.restart);
+			player.buttons.rewind    = _getEl(config.buttonComponents.rewind);
+			player.buttons.forward   = _getEl(config.buttonComponents.forward);
+			player.buttons.mute      = _getEl(config.volumeComponents.inputMute);
+			player.buttons.muteLabel = _getEl(config.volumeComponents.labelMute);
+			player.buttons.seek      = _getEl(config.seekerComponents.seek);
+			player.duration          = _getEl(config.durationComponents.timeDuration);
+			player.curTime           = _getEl(config.durationComponents.timeCurrent);
+			player.volume            = _getEl(config.volumeComponents.inputVolume);
 
 			player.progress             = {};
-			player.progress.container   = _getEl(defaults.seekerComponents.container);
+			player.progress.container   = _getEl(config.seekerComponents.container);
 			player.progress.played      = {};
-			player.progress.played.bar  = _getEl(defaults.seekerComponents.played);
+			player.progress.played.bar  = _getEl(config.seekerComponents.played);
 			player.progress.played.text = player.progress.played.bar &&
 				player.progress.played.bar.getElementsByTagName('span')[0];
 			player.progress.buffer      = {};
-			player.progress.buffer.bar  = _getEl(defaults.seekerComponents.buffer);
+			player.progress.buffer.bar  = _getEl(config.seekerComponents.buffer);
 			player.progress.buffer.text = player.progress.buffer.bar &&
 				player.progress.buffer.bar.getElementsByTagName('span')[0];
 
@@ -815,8 +832,9 @@ player = (function (api) {
 
 	}
 
-	api.setup = function () {
+	api.setup = function (options) {
 		var elements = document.querySelectorAll(defaults.player_container);
+		config       = _extend(defaults, options);
 		var playmeZ  = [];
 
 		for (var i = elements.length - 1; i >= 0; i--) {
