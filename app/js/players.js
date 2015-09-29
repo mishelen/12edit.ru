@@ -112,9 +112,10 @@ player = (function (api) {
 	var cashCurrentPlayer,
 	    // и его id
 	    cashID,
+	    browser = _sniffer(),
 	    xmlns = 'http://www.w3.org/2000/svg';
 
-	// Вспомогательные функции
+	// Вспомогательные функции 
 
 	function _random_ceil(digits) {
 		var numer = Math.ceil(Math.random() * Math.pow(10, digits));
@@ -229,6 +230,74 @@ player = (function (api) {
 			})()
 		};
 		return storage;
+	}
+
+	// Навеяно: http://paypal.github.io/accessible-html5-video-player/
+	function _sniffer() {
+		var nAgt         = navigator.userAgent,
+		    name         = navigator.appName,
+		    fullVersion  = "" + parseFloat(navigator.appVersion),
+		    majorVersion = parseInt(navigator.appVersion, 10),
+		    nameOffset,
+		    verOffset,
+		    ix;
+
+		// MSIE 11
+		if ((navigator.appVersion.indexOf("Windows NT") !== -1) && (navigator.appVersion.indexOf("rv:11") !== -1)) {
+			name        = "IE";
+			fullVersion = "11;";
+		}
+		// MSIE
+		else if ((verOffset = nAgt.indexOf("MSIE")) !== -1) {
+			name        = "IE";
+			fullVersion = nAgt.substring(verOffset + 5);
+		}
+		// Chrome
+		else if ((verOffset = nAgt.indexOf("Chrome")) !== -1) {
+			name        = "Chrome";
+			fullVersion = nAgt.substring(verOffset + 7);
+		}
+		// Safari
+		else if ((verOffset = nAgt.indexOf("Safari")) !== -1) {
+			name        = "Safari";
+			fullVersion = nAgt.substring(verOffset + 7);
+			if ((verOffset = nAgt.indexOf("Version")) !== -1) {
+				fullVersion = nAgt.substring(verOffset + 8);
+			}
+		}
+		// Firefox
+		else if ((verOffset = nAgt.indexOf("Firefox")) !== -1) {
+			name        = "Firefox";
+			fullVersion = nAgt.substring(verOffset + 8);
+		}
+		// In most other browsers, "name/version" is at the end of userAgent 
+		else if ((nameOffset = nAgt.lastIndexOf(" ") + 1) < (verOffset = nAgt.lastIndexOf("/"))) {
+			name        = nAgt.substring(nameOffset, verOffset);
+			fullVersion = nAgt.substring(verOffset + 1);
+
+			if (name.toLowerCase() == name.toUpperCase()) {
+				name = navigator.appName;
+			}
+		}
+		// Trim the fullVersion string at semicolon/space if present
+		if ((ix = fullVersion.indexOf(";")) !== -1) {
+			fullVersion = fullVersion.substring(0, ix);
+		}
+		if ((ix = fullVersion.indexOf(" ")) !== -1) {
+			fullVersion = fullVersion.substring(0, ix);
+		}
+		// Get major version
+		majorVersion = parseInt("" + fullVersion, 10);
+		if (isNaN(majorVersion)) {
+			fullVersion  = "" + parseFloat(navigator.appVersion);
+			majorVersion = parseInt(navigator.appVersion, 10);
+		}
+		// Сохраняем в общую переменную модуля
+		return {
+			name   : name,
+			version: majorVersion,
+			ios    : /(iPad|iPhone|iPod)/g.test(navigator.platform)
+		};
 	}
 
 	assembleUI.cash = {};
@@ -757,8 +826,7 @@ player = (function (api) {
 		// Звучит заманчиво добавить делегированные прослушки
 
 		function listeners() {
-			// var inputEvent = (player.browser.name == "IE" ? "change" : "input");
-			var inputEvent = 'input';
+			var inputEvent = (browser.name == "IE" ? "change" : "input");
 
 			_on(player.buttons.play, 'click', _play);
 			if (player.buttons.rewind) _on(player.buttons.rewind, 'click', _rewind);
@@ -813,6 +881,10 @@ player = (function (api) {
 			player.media.removeAttribute('controls');
 			player.media.setAttribute('preload', 'metadata');
 			_toggleClass(player.container, 'player-' + player.type, true);
+			if(browser.ios) {
+				_toggleClass(player.container, "ios", true);
+			}
+
 
 			injectControls();
 			referenceControls();
