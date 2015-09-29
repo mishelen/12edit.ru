@@ -100,7 +100,7 @@ player = (function (api) {
 		    playerCustomConfigs: {
 			    thumb    : ['play'],
 			    amp      : ['play', 'amp'],
-//			    slider   : ['seeker', 'play', 'timeCurrent', 'timeDuration', 'mute', 'volume'],
+			    //			    slider   : ['seeker', 'play', 'timeCurrent', 'timeDuration', 'mute', 'volume'],
 			    slider   : ['play', 'mute', 'seeker', 'volume'],
 			    video    : ['seeker', 'restart', 'play', 'rewind', 'forward', 'timeCurrent', 'timeDuration', 'mute', 'volume'],
 			    'default': ['seeker', 'restart', 'play', 'rewind', 'forward', 'timeCurrent', 'timeDuration', 'mute', 'volume']
@@ -399,7 +399,7 @@ player = (function (api) {
 			// Здесь синхронизациия проигрывания всех плееров
 			// Можно доделать асинхронный режим, а то пока грубо, но сам режим
 			// так ужасен, что оставлю
-			if (!defaults.syncedPlayers) {
+			if (!config.syncedPlayers) {
 				cashID            = player.container.id;
 				cashCurrentPlayer = player;
 			}
@@ -421,33 +421,33 @@ player = (function (api) {
 			} else {
 				player.media.play();
 			}
-			if (defaults.syncedPlayers) {
+			if (config.syncedPlayers) {
 				cashID            = player.container.id;
 				cashCurrentPlayer = player;
 			}
 		}
 
 		function _checkPlaying() {
-			_toggleClass(player.container, defaults.stateClassFor.playing,
+			_toggleClass(player.container, config.stateClassFor.playing,
 				!player.media.paused);
-			_toggleClass(player.container, defaults.stateClassFor.paused,
+			_toggleClass(player.container, config.stateClassFor.paused,
 				player.media.paused);
 		}
 
 		function _inTheEnd() {
-			_toggleClass(player.container, defaults.stateClassFor.paused,
+			_toggleClass(player.container, config.stateClassFor.paused,
 				false);
-			_toggleClass(player.container, defaults.stateClassFor.ended,
+			_toggleClass(player.container, config.stateClassFor.ended,
 				player.media.paused);
 			_seek();
 		}
 
 		function _rewind() {
-			_seek(player.media.currentTime - defaults.seekTime);
+			_seek(player.media.currentTime - config.seekTime);
 		}
 
 		function _forward() {
-			_seek(player.media.currentTime + defaults.seekTime);
+			_seek(player.media.currentTime + config.seekTime);
 		}
 
 		function _seek(input) {
@@ -542,7 +542,7 @@ player = (function (api) {
 
 			clearTimeout(player.loadingTimer);
 			player.loadingTimer = setTimeout(function () {
-				_toggleClass(player.container, defaults.stateClassFor.loading,
+				_toggleClass(player.container, config.stateClassFor.loading,
 					loading);
 			}, (loading ? 250 : 0));
 		}
@@ -580,22 +580,21 @@ player = (function (api) {
 
 		function _setVolume(volume) {
 			if (typeof volume === 'undefined') {
-				if (defaults.storage.enabled && _storage().supported) {
-					volume = window.localStorage[defaults.storage.key]
-						|| defaults.volumeLevel;
+				if (config.storage.enabled && _storage().supported) {
+					volume = window.localStorage[config.storage.key]
+						|| config.volumeLevel;
 				} else {
-					volume = defaults.volumeLevel;
+					volume = config.volumeLevel;
 				}
 
 			}
 			if (volume > 10) volume = 10;
 			player.media.volume = parseFloat(volume / 10);
 
-
 			if (!player.volume) return; // Есть плеера без контролов...
 			player.volume.value = volume;
-			if (defaults.storage.enabled && _storage().supported) {
-				window.localStorage.setItem(defaults.storage.key, volume);
+			if (config.storage.enabled && _storage().supported) {
+				window.localStorage.setItem(config.storage.key, volume);
 			}
 			_checkMuteClass();
 			_checkVolumeLevel(volume);
@@ -633,9 +632,44 @@ player = (function (api) {
 
 		function injectControls() {
 
-			var localID          = _random_ceil(6);
-			var player_bar       = document.createElement('div');
-			player_bar.className = defaults.player_bar;
+			player.configuration = player.container.getAttribute('data-player-config') || 'default';
+
+			var localID   = _random_ceil(6),
+			    playerBar = document.createElement('div'),
+			    configUI  = config.playerCustomConfigs[player.configuration];
+
+			playerBar.className = config.playerBar;
+
+			function montageUI() {
+
+				for (var i = 0; i < configUI.length; i++) {
+
+					var control = assembleUI(configUI[i]).cloneNode(true);
+					if (configUI[i] == 'amp') {
+						player.container.appendChild(control);
+						continue;
+					}
+
+					control && playerBar.appendChild(control);
+				}
+				if (player.configuration == 'amp') playerBar.appendChild(_getEl('title'));
+
+				playerBar.innerHTML = _replaceAll(playerBar.innerHTML, 'localID', localID)
+			}
+
+			montageUI();
+
+			player.container.insertBefore(playerBar, player.media.nextSibling);
+
+			player.container.id = localID;
+			if (player.container.hasAttribute('data-musDiagramm')) {
+				var data      = player.container.getAttribute('data-musDiagramm');
+				player.container.removeAttribute('data-musDiagramm');
+				player.object = player.container.getElementsByTagName('object')[0];
+				player.object.setAttribute('data', data);
+
+				player.object.onload = prepareAmpDiagramm;
+			}
 
 			function prepareAmpDiagramm() {
 				var svg,
@@ -665,43 +699,6 @@ player = (function (api) {
 				svg.insertBefore(defs, allAmp);
 				svg.insertBefore(progressAmp, allAmp.nextSibling);
 				player.ampState = 1;
-
-			}
-
-			var config          = defaults.playerCustomConfigs;
-			var className       = player.container.className;
-
-			function montageUI() {
-				for (var type in config) {
-					if (className.indexOf(type) != -1) {
-						player.configuration = type;
-						for (var i = 0; i < config[player.configuration].length; i++) {
-							var control = assembleUI(config[player.configuration][i]).cloneNode(true);
-							if (config[player.configuration][i] == 'amp') {
-								player.container.appendChild(control);
-
-								continue;
-							}
-							control && player_bar.appendChild(control);
-						}
-					}
-				}
-
-				if (player.configuration == 'amp') player_bar.appendChild(_getEl('title'));
-				player_bar.innerHTML = _replaceAll(player_bar.innerHTML, 'localID', localID)
-			}
-
-			montageUI();
-
-			player.container.insertBefore(player_bar, player.media.nextSibling);
-			player.container.id = localID;
-			if (player.container.hasAttribute('data-musDiagramm')) {
-				var data             = player.container.getAttribute('data-musDiagramm');
-				player.container.removeAttribute('data-musDiagramm');
-				player.object        = player.container.getElementsByTagName('object')[0];
-
-				player.object.setAttribute('data', data);
-				player.object.onload = prepareAmpDiagramm;
 			}
 
 		}
@@ -830,8 +827,8 @@ player = (function (api) {
 	}
 
 	api.setup = function (options) {
-		var elements = document.querySelectorAll(defaults.player_container);
 		config       = _extend(defaults, options);
+		var elements = document.querySelectorAll(config.player_container);
 		var playmeZ  = [];
 
 		for (var i = elements.length - 1; i >= 0; i--) {
